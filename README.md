@@ -21,7 +21,8 @@ fraud-detection-system/
  |   |   |-- data_loader.py      # Data loading and validation
  |   |   |-- feature_engineer.py # Transaction-level feature engineering
  |   |-- models/                 # Block 2: Anomaly Detection Engines
- |   |   |-- autoencoder.py      # Deep Autoencoder (reconstruction error based)
+ |   |   |-- autoencoder_deep.py # Deep Autoencoder (reconstruction error based)
+ |   |   |-- autoencoder_lstm.py # LSTM Autoencoder for sequential patterns
  |   |   |-- xgb_detector.py     # XGBoost Classifier with Purged CV
  |   |   |-- isolation_forest.py # Baseline: Isolation Forest (unsupervised)
  |   |-- evaluation/             # Block 3: Model Tournament & Financial Analysis
@@ -98,8 +99,9 @@ streamlit run src/dashboard/app.py
 ## Implemented Models
 
 1. **Deep Autoencoder:** Symmetric architecture (Input→64→32→16→32→64→Input) trained only on normal transactions. Anomalies detected via reconstruction error exceeding a dynamic P95 threshold.
-2. **XGBoost Classifier:** Gradient Boosting with `scale_pos_weight` for class imbalance, Purged & Embargoed K-Fold CV, and F1-Score optimization.
-3. **Isolation Forest (Baseline):** Unsupervised ensemble method using random partitions to isolate anomalies.
+2. **LSTM Autoencoder:** Sequential deep learning model capturing the temporal velocity of transactions. Achieves state-of-the-art anomaly detection on time-series fraud.
+3. **XGBoost Classifier:** Gradient Boosting with `scale_pos_weight` for class imbalance, Purged & Embargoed K-Fold CV, and F1-Score optimization.
+4. **Isolation Forest (Baseline):** Unsupervised ensemble method using random partitions to isolate anomalies.
 
 ---
 
