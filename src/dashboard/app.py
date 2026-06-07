@@ -316,7 +316,7 @@ def page_data_explorer(data: dict):
 
     # Tabla interactiva
     st.dataframe(
-        filtered.head(500).style.applymap(
+        filtered.head(500).style.map(
             lambda v: 'color: #e74c3c' if v == 1 else '',
             subset=['is_fraud']
         ),
