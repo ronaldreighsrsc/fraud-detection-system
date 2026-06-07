@@ -81,8 +81,7 @@ class FraudXGBoostDetector:
                     scale_pos_weight=spw,
                     random_state=self.random_state,
                     n_jobs=-1,
-                    eval_metric='logloss',
-                    use_label_encoder=False,
+                    eval_metric='logloss'
                 )
                 model.fit(X_train[train_idx], y_train[train_idx])
                 preds = model.predict(X_train[val_idx])
@@ -118,8 +117,7 @@ class FraudXGBoostDetector:
             scale_pos_weight=spw,
             random_state=self.random_state,
             n_jobs=-1,
-            eval_metric='logloss',
-            use_label_encoder=False,
+            eval_metric='logloss'
         )
         self.model.fit(X_scaled, y_train)
 

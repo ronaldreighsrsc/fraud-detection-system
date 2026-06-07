@@ -26,8 +26,10 @@ def load_data():
     results_dir = "./src/evaluation/results/"
     if os.path.exists(os.path.join(results_dir, "y_test.npy")):
         data['y_test'] = np.load(os.path.join(results_dir, "y_test.npy"))
-        data['ae_scores'] = np.load(os.path.join(results_dir, "ae_scores.npy"))
-        data['ae_preds'] = np.load(os.path.join(results_dir, "ae_predictions.npy"))
+        data['ae_deep_scores'] = np.load(os.path.join(results_dir, "ae_deep_scores.npy"))
+        data['ae_deep_preds'] = np.load(os.path.join(results_dir, "ae_deep_predictions.npy"))
+        data['ae_lstm_scores'] = np.load(os.path.join(results_dir, "ae_lstm_scores.npy"))
+        data['ae_lstm_preds'] = np.load(os.path.join(results_dir, "ae_lstm_predictions.npy"))
         data['xgb_probs'] = np.load(os.path.join(results_dir, "xgb_probs.npy"))
         data['xgb_preds'] = np.load(os.path.join(results_dir, "xgb_predictions.npy"))
         data['iso_scores'] = np.load(os.path.join(results_dir, "iso_scores.npy"))
@@ -196,12 +198,16 @@ def page_anomaly_analysis(data: dict):
     # Selector de modelo
     model_choice = st.selectbox(
         "Selecciona el modelo a analizar:",
-        ['Deep Autoencoder', 'XGBoost Classifier', 'Isolation Forest']
+        ['LSTM Autoencoder', 'Deep Autoencoder', 'XGBoost Classifier', 'Isolation Forest']
     )
 
-    if model_choice == 'Deep Autoencoder':
-        scores = data['ae_scores']
-        preds = data['ae_preds']
+    if model_choice == 'LSTM Autoencoder':
+        scores = data['ae_lstm_scores']
+        preds = data['ae_lstm_preds']
+        score_label = 'LSTM Reconstruction Error (MSE)'
+    elif model_choice == 'Deep Autoencoder':
+        scores = data['ae_deep_scores']
+        preds = data['ae_deep_preds']
         score_label = 'Reconstruction Error (MSE)'
     elif model_choice == 'XGBoost Classifier':
         scores = data['xgb_probs']

@@ -24,8 +24,12 @@ def run_evaluation_pipeline():
 
     models_data = {
         'Deep Autoencoder': {
-            'preds': np.load(os.path.join(results_dir, "ae_predictions.npy")),
-            'scores': np.load(os.path.join(results_dir, "ae_scores.npy")),
+            'preds': np.load(os.path.join(results_dir, "ae_deep_predictions.npy")),
+            'scores': np.load(os.path.join(results_dir, "ae_deep_scores.npy")),
+        },
+        'LSTM Autoencoder': {
+            'preds': np.load(os.path.join(results_dir, "ae_lstm_predictions.npy")),
+            'scores': np.load(os.path.join(results_dir, "ae_lstm_scores.npy")),
         },
         'XGBoost Classifier': {
             'preds': np.load(os.path.join(results_dir, "xgb_predictions.npy")),

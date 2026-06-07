@@ -7,9 +7,9 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-class FraudAutoencoder:
+class FraudDeepAutoencoder:
     """
-    Deep Autoencoder para detección de fraude basado en error de reconstrucción.
+    Deep Autoencoder para Detección de Anomalías Financieras.ado en error de reconstrucción.
 
     Arquitectura: Input → 64 → 32 → 16 (espacio latente) → 32 → 64 → Input
     Entrenado EXCLUSIVAMENTE con transacciones legítimas (clase 0).
@@ -57,8 +57,8 @@ class FraudAutoencoder:
         x = keras.layers.BatchNormalization()(x)
         decoded = keras.layers.Dense(input_dim, activation='linear')(x)
 
-        autoencoder = keras.Model(inputs, decoded, name='fraud_autoencoder')
-        encoder = keras.Model(inputs, encoded, name='encoder')
+        autoencoder = keras.Model(inputs, decoded, name='fraud_deep_autoencoder')
+        encoder = keras.Model(inputs, encoded, name='deep_encoder')
 
         autoencoder.compile(
             optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate),

@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from preprocessing.feature_engineer import TransactionFeatureEngineer
-from models.autoencoder import FraudAutoencoder
+from models.autoencoder_deep import FraudDeepAutoencoder
+from models.autoencoder_lstm import FraudLSTMAutoencoder
 from models.xgb_detector import FraudXGBoostDetector
 from models.isolation_forest import AnomalyIsolationForest
 import warnings
@@ -53,18 +54,29 @@ def run_training_pipeline():
 
     os.makedirs("./src/evaluation/results", exist_ok=True)
 
-    # --- MODELO 1: Deep Autoencoder ---
-    print("\n--- MODELO 1: Deep Autoencoder ---")
-    autoencoder = FraudAutoencoder(encoding_dim=16, epochs=100, batch_size=256)
+    # --- MODELO 1A: Deep Autoencoder ---
+    print("\n--- MODELO 1A: Deep Autoencoder ---")
+    autoencoder_deep = FraudDeepAutoencoder(encoding_dim=16, epochs=100, batch_size=256)
 
     # Entrenar SOLO con datos normales
     X_train_normal = X_train[y_train == 0]
-    ae_info = autoencoder.fit(X_train_normal)
+    ae_info = autoencoder_deep.fit(X_train_normal)
 
-    ae_preds, ae_scores = autoencoder.predict(X_test)
-    np.save("./src/evaluation/results/ae_predictions.npy", ae_preds)
-    np.save("./src/evaluation/results/ae_scores.npy", ae_scores)
-    print(f"  💾 Predicciones del Autoencoder guardadas")
+    ae_preds, ae_scores = autoencoder_deep.predict(X_test)
+    np.save("./src/evaluation/results/ae_deep_predictions.npy", ae_preds)
+    np.save("./src/evaluation/results/ae_deep_scores.npy", ae_scores)
+    print(f"  💾 Predicciones del Deep Autoencoder guardadas")
+
+    # --- MODELO 1B: LSTM Autoencoder ---
+    print("\n--- MODELO 1B: LSTM Autoencoder ---")
+    autoencoder_lstm = FraudLSTMAutoencoder(encoding_dim=16, epochs=50, batch_size=256)
+
+    ae_lstm_info = autoencoder_lstm.fit(X_train_normal)
+
+    ae_lstm_preds, ae_lstm_scores = autoencoder_lstm.predict(X_test)
+    np.save("./src/evaluation/results/ae_lstm_predictions.npy", ae_lstm_preds)
+    np.save("./src/evaluation/results/ae_lstm_scores.npy", ae_lstm_scores)
+    print(f"  💾 Predicciones del LSTM Autoencoder guardadas")
 
     # --- MODELO 2: XGBoost ---
     print("\n--- MODELO 2: XGBoost Classifier ---")
