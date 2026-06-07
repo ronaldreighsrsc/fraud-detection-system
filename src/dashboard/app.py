@@ -30,6 +30,8 @@ def load_data():
         data['ae_deep_preds'] = np.load(os.path.join(results_dir, "ae_deep_predictions.npy"))
         data['ae_lstm_scores'] = np.load(os.path.join(results_dir, "ae_lstm_scores.npy"))
         data['ae_lstm_preds'] = np.load(os.path.join(results_dir, "ae_lstm_predictions.npy"))
+        data['gan_scores'] = np.load(os.path.join(results_dir, "gan_scores.npy"))
+        data['gan_preds'] = np.load(os.path.join(results_dir, "gan_predictions.npy"))
         data['xgb_probs'] = np.load(os.path.join(results_dir, "xgb_probs.npy"))
         data['xgb_preds'] = np.load(os.path.join(results_dir, "xgb_predictions.npy"))
         data['iso_scores'] = np.load(os.path.join(results_dir, "iso_scores.npy"))
@@ -198,13 +200,17 @@ def page_anomaly_analysis(data: dict):
     # Selector de modelo
     model_choice = st.selectbox(
         "Selecciona el modelo a analizar:",
-        ['LSTM Autoencoder', 'Deep Autoencoder', 'XGBoost Classifier', 'Isolation Forest']
+        ['LSTM Autoencoder', 'GAN Anomaly Detector', 'Deep Autoencoder', 'XGBoost Classifier', 'Isolation Forest']
     )
 
     if model_choice == 'LSTM Autoencoder':
         scores = data['ae_lstm_scores']
         preds = data['ae_lstm_preds']
         score_label = 'LSTM Reconstruction Error (MSE)'
+    elif model_choice == 'GAN Anomaly Detector':
+        scores = data['gan_scores']
+        preds = data['gan_preds']
+        score_label = 'Discriminator Anomaly Score (1 - D(x))'
     elif model_choice == 'Deep Autoencoder':
         scores = data['ae_deep_scores']
         preds = data['ae_deep_preds']

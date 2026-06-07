@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from preprocessing.feature_engineer import TransactionFeatureEngineer
 from models.autoencoder_deep import FraudDeepAutoencoder
 from models.autoencoder_lstm import FraudLSTMAutoencoder
+from models.gan_detector import FraudGANDetector
 from models.xgb_detector import FraudXGBoostDetector
 from models.isolation_forest import AnomalyIsolationForest
 import warnings
@@ -77,6 +78,17 @@ def run_training_pipeline():
     np.save("./src/evaluation/results/ae_lstm_predictions.npy", ae_lstm_preds)
     np.save("./src/evaluation/results/ae_lstm_scores.npy", ae_lstm_scores)
     print(f"  💾 Predicciones del LSTM Autoencoder guardadas")
+
+    # --- MODELO 1C: GAN Anomaly Detector ---
+    print("\n--- MODELO 1C: GAN Anomaly Detector ---")
+    gan_detector = FraudGANDetector(latent_dim=16, epochs=60, batch_size=256)
+
+    gan_info = gan_detector.fit(X_train_normal)
+
+    gan_preds, gan_scores = gan_detector.predict(X_test)
+    np.save("./src/evaluation/results/gan_predictions.npy", gan_preds)
+    np.save("./src/evaluation/results/gan_scores.npy", gan_scores)
+    print(f"  💾 Predicciones de la GAN guardadas")
 
     # --- MODELO 2: XGBoost ---
     print("\n--- MODELO 2: XGBoost Classifier ---")

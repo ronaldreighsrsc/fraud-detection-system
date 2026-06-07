@@ -31,6 +31,10 @@ def run_evaluation_pipeline():
             'preds': np.load(os.path.join(results_dir, "ae_lstm_predictions.npy")),
             'scores': np.load(os.path.join(results_dir, "ae_lstm_scores.npy")),
         },
+        'GAN Anomaly Detector': {
+            'preds': np.load(os.path.join(results_dir, "gan_predictions.npy")),
+            'scores': np.load(os.path.join(results_dir, "gan_scores.npy")),
+        },
         'XGBoost Classifier': {
             'preds': np.load(os.path.join(results_dir, "xgb_predictions.npy")),
             'scores': np.load(os.path.join(results_dir, "xgb_probs.npy")),
