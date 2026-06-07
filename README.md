@@ -119,3 +119,17 @@ The `data_synthesizer.py` module generates realistic financial transactions prof
 - **NVIDIA:** Applications of AI for Anomaly Detection
 - **Anti-Leakage:** Purged K-Fold Cross-Validation with Embargo (López de Prado, 2018)
 - **Evaluation:** Multi-metric tournament with financial cost analysis
+
+---
+
+## 🚀 V2.0: Big Data & GPU Scalability (NVIDIA RAPIDS)
+
+While the current main branch is designed for CPU execution (Pandas/Scikit-Learn) to ensure maximum compatibility for anyone cloning the repo, this architecture is fully prepared to scale to massive financial datasets (e.g., millions of transactions per day).
+
+To achieve extreme performance without CPU-to-GPU memory bottlenecks, the ETL and training pipelines can be migrated to **NVIDIA RAPIDS**:
+
+1. **cuDF (GPU Pandas):** Replaces traditional Pandas for Feature Engineering (rolling statistics, customer behavior aggregation). Data is loaded directly into GPU VRAM.
+2. **Apache Arrow:** Eliminates serialization overhead. Data remains in the GPU memory while moving from the cuDF preprocessing step directly into the model.
+3. **XGBoost (GPU Accelerated):** Uses 	ree_method='gpu_hist' to train on the GPU directly from the cuDF data structure, dropping training times from hours to seconds even with millions of rows.
+
+*Note: An experimental implementation of this GPU pipeline is available in the eature/rapids-gpu-scaling branch.*
