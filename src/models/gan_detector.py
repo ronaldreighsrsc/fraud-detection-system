@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 from sklearn.preprocessing import StandardScaler
 import warnings
+import joblib
 
 warnings.filterwarnings("ignore")
 
@@ -161,3 +162,38 @@ class FraudGANDetector:
         anomaly_scores = self.get_reconstruction_errors(X)
         predictions = (anomaly_scores > self.threshold).astype(int)
         return predictions, anomaly_scores
+
+    def save(self, filepath: str) -> None:
+        """Guarda los modelos (G y D), scaler y threshold en disco."""
+        if self.generator is None or self.discriminator is None:
+            raise ValueError("No hay modelo entrenado para guardar.")
+        
+        # Keras models
+        g_path = filepath.replace(".pkl", "_g.keras")
+        d_path = filepath.replace(".pkl", "_d.keras")
+        self.generator.save(g_path)
+        self.discriminator.save(d_path)
+        
+        state = {
+            'scaler': self.scaler,
+            'threshold': self.threshold,
+            'latent_dim': self.latent_dim
+        }
+        joblib.dump(state, filepath)
+        print(f"  💾 GAN guardada en {filepath}, {g_path} y {d_path}")
+
+    @classmethod
+    def load(cls, filepath: str):
+        """Carga un modelo guardado previamente."""
+        state = joblib.load(filepath)
+        g_path = filepath.replace(".pkl", "_g.keras")
+        d_path = filepath.replace(".pkl", "_d.keras")
+        
+        instance = cls(latent_dim=state['latent_dim'])
+        instance.scaler = state['scaler']
+        instance.threshold = state['threshold']
+        
+        instance.generator = keras.models.load_model(g_path)
+        instance.discriminator = keras.models.load_model(d_path)
+        
+        return instance

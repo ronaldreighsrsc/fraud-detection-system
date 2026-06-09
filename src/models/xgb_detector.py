@@ -4,6 +4,7 @@ import xgboost as xgb
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, f1_score
 import warnings
+import joblib
 
 warnings.filterwarnings("ignore")
 
@@ -146,3 +147,31 @@ class FraudXGBoostDetector:
         }).sort_values('importance', ascending=False).reset_index(drop=True)
 
         return importance_df
+
+    def save(self, filepath: str) -> None:
+        """Guarda el modelo, scaler y mejores parámetros en un archivo."""
+        if self.model is None:
+            raise ValueError("No hay modelo entrenado para guardar.")
+        
+        state = {
+            'model': self.model,
+            'scaler': self.scaler,
+            'best_params': self.best_params,
+            'feature_importances_': self.feature_importances_
+        }
+        joblib.dump(state, filepath)
+        print(f"  💾 Modelo XGBoost guardado en {filepath}")
+
+    @classmethod
+    def load(cls, filepath: str):
+        """Carga un modelo guardado previamente."""
+        state = joblib.load(filepath)
+        
+        # Crear una instancia vacía y restaurar el estado
+        instance = cls()
+        instance.model = state['model']
+        instance.scaler = state['scaler']
+        instance.best_params = state['best_params']
+        instance.feature_importances_ = state['feature_importances_']
+        
+        return instance

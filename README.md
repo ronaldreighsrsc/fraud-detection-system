@@ -36,6 +36,7 @@ fraud-detection-system/
  |   |-- main_preprocessing.py   # Block 1 Orchestrator
  |   |-- main_training.py        # Block 2 Orchestrator (Model Tournament)
  |   |-- main_evaluation.py      # Block 3 Orchestrator (Comparative Results)
+ |-- fastapii.py                 # Block 4 RESTful API (FastAPI)
  |-- .github/
  |   |-- workflows/
  |   |   |-- ci.yml              # Continuous Integration (lint + smoke test)
@@ -94,6 +95,13 @@ Launches a **Streamlit** web application with four interactive pages: Dataset Ov
 streamlit run src/dashboard/app.py
 ```
 *(Opens a local web server at `http://localhost:8501` with interactive Plotly charts).*
+
+### Block 4: RESTful API Deployment (Real-Time Inference)
+Exposes the 5 trained ML models (XGBoost, Isolation Forest, Deep Autoencoder, LSTM, GAN) through a high-performance **FastAPI** server. It utilizes `lifespan` for in-memory model caching and validates incoming JSON payloads representing transactions using **Pydantic**.
+```bash
+uvicorn fastapii:app --reload
+```
+*(Opens an interactive Swagger UI documentation at `http://127.0.0.1:8000/docs` to test the predictive endpoints).*
 
 ---
 

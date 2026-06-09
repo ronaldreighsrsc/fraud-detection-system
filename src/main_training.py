@@ -54,6 +54,7 @@ def run_training_pipeline():
     print(f"  📦 Fraudes en Train: {y_train.sum():,} | Fraudes en Test: {y_test.sum():,}")
 
     os.makedirs("./src/evaluation/results", exist_ok=True)
+    os.makedirs("./models/saved_models", exist_ok=True)
 
     # --- MODELO 1A: Deep Autoencoder ---
     print("\n--- MODELO 1A: Deep Autoencoder ---")
@@ -62,6 +63,7 @@ def run_training_pipeline():
     # Entrenar SOLO con datos normales
     X_train_normal = X_train[y_train == 0]
     ae_info = autoencoder_deep.fit(X_train_normal)
+    autoencoder_deep.save("./models/saved_models/ae_deep.pkl")
 
     ae_preds, ae_scores = autoencoder_deep.predict(X_test)
     np.save("./src/evaluation/results/ae_deep_predictions.npy", ae_preds)
@@ -73,6 +75,7 @@ def run_training_pipeline():
     autoencoder_lstm = FraudLSTMAutoencoder(encoding_dim=16, epochs=50, batch_size=256)
 
     ae_lstm_info = autoencoder_lstm.fit(X_train_normal)
+    autoencoder_lstm.save("./models/saved_models/ae_lstm.pkl")
 
     ae_lstm_preds, ae_lstm_scores = autoencoder_lstm.predict(X_test)
     np.save("./src/evaluation/results/ae_lstm_predictions.npy", ae_lstm_preds)
@@ -84,6 +87,7 @@ def run_training_pipeline():
     gan_detector = FraudGANDetector(latent_dim=16, epochs=60, batch_size=256)
 
     gan_info = gan_detector.fit(X_train_normal)
+    gan_detector.save("./models/saved_models/gan.pkl")
 
     gan_preds, gan_scores = gan_detector.predict(X_test)
     np.save("./src/evaluation/results/gan_predictions.npy", gan_preds)
@@ -96,6 +100,7 @@ def run_training_pipeline():
 
     best_params = xgb_detector.find_best_params(X_train, y_train)
     xgb_detector.train(X_train, y_train, best_params)
+    xgb_detector.save("./models/saved_models/xgb.pkl")
 
     xgb_preds, xgb_probs = xgb_detector.predict(X_test)
     np.save("./src/evaluation/results/xgb_predictions.npy", xgb_preds)
@@ -110,6 +115,7 @@ def run_training_pipeline():
     print("\n--- MODELO 3: Isolation Forest (Baseline) ---")
     iso_forest = AnomalyIsolationForest(contamination=0.02, n_estimators=200)
     iso_forest.fit(X_train)
+    iso_forest.save("./models/saved_models/iso.pkl")
 
     iso_preds, iso_scores = iso_forest.predict(X_test)
     np.save("./src/evaluation/results/iso_predictions.npy", iso_preds)

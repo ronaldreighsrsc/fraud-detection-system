@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 from sklearn.preprocessing import StandardScaler
 import warnings
+import joblib
 
 warnings.filterwarnings("ignore")
 
@@ -132,3 +133,36 @@ class FraudDeepAutoencoder:
         """Extrae las representaciones del espacio latente (para visualización)."""
         X_scaled = self.scaler.transform(X)
         return self.encoder.predict(X_scaled, verbose=0)
+
+    def save(self, filepath: str) -> None:
+        """Guarda el modelo, scaler y threshold en disco."""
+        if self.model is None:
+            raise ValueError("No hay modelo entrenado para guardar.")
+        
+        # Keras model se guarda aparte en su formato nativo
+        keras_path = filepath.replace(".pkl", ".keras")
+        self.model.save(keras_path)
+        
+        # Metadatos
+        state = {
+            'scaler': self.scaler,
+            'threshold': self.threshold,
+            'encoding_dim': self.encoding_dim
+        }
+        joblib.dump(state, filepath)
+        print(f"  💾 Deep Autoencoder guardado en {filepath} y {keras_path}")
+
+    @classmethod
+    def load(cls, filepath: str):
+        """Carga un modelo guardado previamente."""
+        state = joblib.load(filepath)
+        keras_path = filepath.replace(".pkl", ".keras")
+        
+        instance = cls(encoding_dim=state['encoding_dim'])
+        instance.scaler = state['scaler']
+        instance.threshold = state['threshold']
+        
+        # Compilamos el dummy para que la clase funcione, luego cargamos pesos
+        instance.model = keras.models.load_model(keras_path)
+        
+        return instance

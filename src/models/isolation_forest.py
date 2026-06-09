@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 import warnings
+import joblib
 
 warnings.filterwarnings("ignore")
 
@@ -61,3 +62,26 @@ class AnomalyIsolationForest:
         anomaly_scores = -self.model.decision_function(X_scaled)
 
         return predictions, anomaly_scores
+
+    def save(self, filepath: str) -> None:
+        """Guarda el modelo y scaler en un archivo."""
+        if self.model is None:
+            raise ValueError("No hay modelo entrenado para guardar.")
+        
+        state = {
+            'model': self.model,
+            'scaler': self.scaler
+        }
+        joblib.dump(state, filepath)
+        print(f"  💾 Modelo Isolation Forest guardado en {filepath}")
+
+    @classmethod
+    def load(cls, filepath: str):
+        """Carga un modelo guardado previamente."""
+        state = joblib.load(filepath)
+        
+        instance = cls()
+        instance.model = state['model']
+        instance.scaler = state['scaler']
+        
+        return instance

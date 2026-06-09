@@ -11,3 +11,8 @@ src/evaluation/results/*.csv
 
 # Archivos ocultos del sistema
 .DS_Store
+
+# Modelos guardados (Archivos binarios pesados que no deben subir a GitHub)
+models/saved_models/
+*.pkl
+*.keras
