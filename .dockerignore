@@ -1,0 +1,16 @@
+# Ignorar entorno virtual
+venv/
+__pycache__/
+*.pyc
+
+# Ignorar archivos de control de versiones
+.git/
+.github/
+
+# Ignorar datos pesados (La API no necesita re-entrenar, solo inferir)
+data/
+src/evaluation/results/
+
+# Ignorar el caché del IDE
+.vscode/
+.idea/

@@ -37,6 +37,8 @@ fraud-detection-system/
  |   |-- main_training.py        # Block 2 Orchestrator (Model Tournament)
  |   |-- main_evaluation.py      # Block 3 Orchestrator (Comparative Results)
  |-- fastapii.py                 # Block 4 RESTful API (FastAPI)
+ |-- Dockerfile                  # Contenedor de Producción
+ |-- .dockerignore               # Reglas de exclusión para Docker
  |-- .github/
  |   |-- workflows/
  |   |   |-- ci.yml              # Continuous Integration (lint + smoke test)
@@ -102,6 +104,22 @@ Exposes the 5 trained ML models (XGBoost, Isolation Forest, Deep Autoencoder, LS
 uvicorn fastapii:app --reload
 ```
 *(Opens an interactive Swagger UI documentation at `http://127.0.0.1:8000/docs` to test the predictive endpoints).*
+
+---
+
+## 🐳 Docker Deployment (MLOps)
+
+The API and its pre-trained models are fully containerized using **Docker** for seamless production deployment. This ensures a consistent, isolated environment across any host machine without requiring local Python dependencies.
+
+1. **Build the image:**
+   ```bash
+   docker build -t fraud-api .
+   ```
+2. **Run the container:**
+   ```bash
+   docker run -p 8000:8000 fraud-api
+   ```
+*(The API will be exposed and accessible at `http://localhost:8000/docs`).*
 
 ---
 
