@@ -129,5 +129,5 @@ def run_training_pipeline():
     print(f"📁 Artefactos guardados en: ./src/evaluation/results/")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": #??
     run_training_pipeline()

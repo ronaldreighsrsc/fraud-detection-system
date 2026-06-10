@@ -77,11 +77,14 @@ class Transaction(BaseModel):
 def read_root():
     return {"mensaje": "¡API de Detección de Fraudes Operativa! 🚀"}
 
+# 3. Definir una ruta de prueba de salud (health check)
 @app.get("/health")
 def health_check():
     loaded = list(ml_models.keys())
     return {"status": "ok", "modelos_cargados": loaded}
 
+# --- NUEVO: Ruta de Inferencia (POST) ---
+# Usamos POST porque el usuario nos está "enviando" una Transacción para analizar
 @app.post("/predict")
 def predict_fraud(transaction: Transaction):
     # Convertir el JSON recibido a un array de Numpy de 1 fila y 18 columnas

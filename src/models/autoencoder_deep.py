@@ -140,7 +140,7 @@ class FraudDeepAutoencoder:
             raise ValueError("No hay modelo entrenado para guardar.")
         
         # Keras model se guarda aparte en su formato nativo
-        keras_path = filepath.replace(".pkl", ".keras")
+        keras_path = filepath.replace(".pkl", ".keras") 
         self.model.save(keras_path)
         
         # Metadatos
@@ -152,17 +152,17 @@ class FraudDeepAutoencoder:
         joblib.dump(state, filepath)
         print(f"  💾 Deep Autoencoder guardado en {filepath} y {keras_path}")
 
-    @classmethod
+    @classmethod #?
     def load(cls, filepath: str):
         """Carga un modelo guardado previamente."""
         state = joblib.load(filepath)
         keras_path = filepath.replace(".pkl", ".keras")
         
-        instance = cls(encoding_dim=state['encoding_dim'])
+        instance = cls(encoding_dim=state['encoding_dim'])  #?
         instance.scaler = state['scaler']
         instance.threshold = state['threshold']
         
         # Compilamos el dummy para que la clase funcione, luego cargamos pesos
-        instance.model = keras.models.load_model(keras_path)
+        instance.model = keras.models.load_model(keras_path) 
         
         return instance

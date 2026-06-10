@@ -134,7 +134,7 @@ The `data_synthesizer.py` module generates realistic financial transactions prof
 
 ---
 
-## 🚀 V2.0: Big Data & GPU Scalability (NVIDIA RAPIDS)
+## V2.0: Big Data & GPU Scalability (NVIDIA RAPIDS)
 
 While the current main branch is designed for CPU execution (Pandas/Scikit-Learn) to ensure maximum compatibility for anyone cloning the repo, this architecture is fully prepared to scale to massive financial datasets (e.g., millions of transactions per day).
 
