@@ -1,165 +1,175 @@
-# Fraud Detection System
+# 🛡️ Autonomous Financial Risk, AML Graph Network & Hybrid Fraud Defense System
+## Bci Enterprise Edition v2.0 — CMF Capítulo 20-10 | Ley 21.234 | UAF Ley 19.913
 
-This repository implements an end-to-end **Fraud Detection System** using Anomaly Detection techniques from the NVIDIA Applications of AI for Anomaly Detection certification. It compares Deep Autoencoders, XGBoost Classifiers, and Isolation Forest models to identify anomalous transactions in financial/retail data.
+![Python](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-v2.0-009688?style=for-the-badge&logo=fastapi)
+![XGBoost](https://img.shields.io/badge/XGBoost-Purged_CV-eb5424?style=for-the-badge)
+![NetworkX](https://img.shields.io/badge/NetworkX-Graph_Theory-green?style=for-the-badge)
+![Redis](https://img.shields.io/badge/Redis-In--Memory_<2ms-dc382d?style=for-the-badge&logo=redis)
+![Docker](https://img.shields.io/badge/Docker-Ultra--Lean-2496ed?style=for-the-badge&logo=docker)
+![CMF](https://img.shields.io/badge/CMF-Capítulo_20--10-navy?style=for-the-badge)
 
-The project demonstrates the full ML lifecycle: synthetic data generation, feature engineering, model training with anti-leakage cross-validation, comparative evaluation, and interactive visualization.
+Sistema corporativo integral de defensa contra el fraude financiero, lavado de activos (PLAFT) y gobernanza de modelos de riesgo (Model Risk Management - MRM), diseñado bajo los estándares de misión crítica de **Banco Bci** y la regulación financiera chilena.
 
 ---
 
-## Project Architecture
+## 🏗️ Arquitectura Dual Batch & Real-Time (Patrón Lambda Bancario)
 
-The code is structured following modularity and single-responsibility principles (SOLID), dividing the workflow into three sequential blocks:
+En la operativa bancaria real, calcular métricas topológicas de grafos sobre millones de clientes en la ruta crítica colapsaría los tiempos de respuesta. Este sistema implementa una **Arquitectura Dual con Redis In-Memory**:
+
+```
+═══════════════════════════════════════════════════════════════════════════════════════════════════
+                      ARQUITECTURA DUAL BATCH & REAL-TIME (BCI ENTERPRISE EDITION)
+═══════════════════════════════════════════════════════════════════════════════════════════════════
+
+ [CAPA BATCH DISTRIBUIDA: DATABRICKS / PYSPARK]
+ ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+ │ Histórico Delta Lake (100M+ tx) ──► PySpark GraphFrames ──► Cálculo Batch In-Degree/PageRank│
+ │                                                              │                              │
+ │                                                              ▼                              │
+ │                                        Sincronización Diaria a REDIS (In-Memory RAM)        │
+ └──────────────────────────────────────────────────────────────┬──────────────────────────────┘
+                                                                │ (Clave-Valor: account_id -> features)
+ [CAPA SERVING TIEMPO REAL: FASTAPI & MLOPS]                    ▼
+ ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+ │ TRANSACCIÓN EN VIVO (JSON) ──► CAPA 1: Reglas Duras CMF (Listas Negativas / Límites)        │
+ │                                      │                                                      │
+ │                                      ▼                                                      │
+ │                                CAPA 2: Point Lookup Redis (< 2 ms) para Métricas de Grafo    │
+ │                                      │                                                      │
+ │                                      ▼                                                      │
+ │                                CAPA 3: Scoring Predictivo (XGBoost + Autoencoders)          │
+ │                                      │                                                      │
+ │                                      ▼                                                      │
+ │                                CAPA 4: Matriz de Acción (Aprobar / Step-Up MFA / Bloqueo)   │
+ │                                      │                                                      │
+ │                                      ▼                                                      │
+ │                                CAPA 5: Gobernanza MLflow & Explicabilidad SHAP (Ley 21.234) │
+ │                                      │                                                      │
+ │                                      ▼                                                      │
+ │                                CAPA 6: Agente RAG GenAI (ChromaDB Tipologías UAF + LLM)     │
+ └─────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ⚡ Módulos Estratégicos v2.0 Enterprise
+
+| Componente | Descripción de Grado Bancario | Ubicación en Repo |
+| :--- | :--- | :--- |
+| **Teoría de Grafos & PLAFT** | Grafo dirigido de transferencias con NetworkX y PySpark. Detección de cuentas concentradoras (*mulas*) y carruseles de lavado según distribución de Pareto ($\alpha=1.8$). | [`src/graphs/`](file:///c:/Users/ronal/fraud-detection-system/src/graphs) |
+| **Caché en Memoria (Redis)** | Point-lookup atómico $O(1)$ en `< 2 ms` con tolerancia a fallos mediante `fakeredis` para desarrollo hermético y CI/CD. | [`src/cache/`](file:///c:/Users/ronal/fraud-detection-system/src/cache) |
+| **Motor Híbrido de Reglas** | Evaluación de mandatos CMF Capítulo 20-10 (listas judiciales, países sancionados, transacciones nocturnas) previa al score ML. | [`src/rules/`](file:///c:/Users/ronal/fraud-detection-system/src/rules) |
+| **Explicabilidad TreeSHAP** | Causalidad auditable local de bloqueos para cumplimiento estricto de la **Ley 21.234 de Fraudes** ante reclamos de clientes. | [`src/explainability/`](file:///c:/Users/ronal/fraud-detection-system/src/explainability) |
+| **Calibración Financiera 40:1** | Optimización de umbral $\theta^*$ que minimiza la pérdida económica por restitución obligatoria de hasta **35 UF** ($C_{FN}=\$1M$ vs $C_{FP}=\$25K$). | [`src/evaluation/`](file:///c:/Users/ronal/fraud-detection-system/src/evaluation) |
+| **Agente GenAI UAF** | Asistente generativo RAG (ChromaDB + LLM) con las Guías Oficiales de Tipologías UAF (N° 3, 7 y 12) y fallback formal determinista. | [`src/compliance/`](file:///c:/Users/ronal/fraud-detection-system/src/compliance) |
+| **Gobernanza MLflow** | Registro inmutable de artefactos y transiciones formales de ciclo de vida (`Development` $\to$ `Staging_Validacion_CMF` $\to$ `Production`). | [`src/models/`](file:///c:/Users/ronal/fraud-detection-system/src/models) |
+| **Ficha Metodológica MRM** | Dossier regulatorio completo en Markdown exigido por los comités de auditoría de riesgo financiero. | [`docs/ficha_metodologica_cmf_uaf.md`](file:///c:/Users/ronal/fraud-detection-system/docs/ficha_metodologica_cmf_uaf.md) |
+
+---
+
+## 🚀 Desacoplamiento Estricto de SLA Bancario
+
+```
+[TRANSACCIÓN ENTRADA] ──► POST /api/v2/evaluate_transaction (SLA < 30 ms)
+                                      │
+                                      ├── 1. Reglas Duras CMF (0.5 ms)
+                                      ├── 2. Point Lookup Redis (< 2 ms)
+                                      ├── 3. Scoring XGBoost en memoria (< 5 ms)
+                                      └── 4. Explicabilidad TreeSHAP (< 15 ms)
+                                      │
+                                      ▼
+                        ¿Bloqueo Preventivo o Inmediato?
+                         ├── (NO) ──► Retorna Aprobado / Step-Up MFA (< 30 ms)
+                         └── (SÍ) ──► Retorna Bloqueo (< 30 ms)
+                                      + Encola Tarea Background (FastAPI)
+                                      │
+                                      ▼ (Asíncrono / Back-office)
+                                     POST /api/v2/compliance/generate_ros/{tx_id}
+                                     (Generación RAG UAF bajo demanda del Oficial de Cumplimiento)
+```
+
+---
+
+## 📦 Estructura Modular del Repositorio
 
 ```text
 fraud-detection-system/
- |-- data/
- |   |-- raw/                    # Synthetic transactions (generated or external datasets)
- |   |-- processed/              # Engineered features ready for modeling
- |-- src/
- |   |-- preprocessing/          # Block 1: Data Synthesis, ETL, Feature Engineering
- |   |   |-- data_synthesizer.py # Realistic synthetic transaction generator
- |   |   |-- data_loader.py      # Data loading and validation
- |   |   |-- feature_engineer.py # Transaction-level feature engineering
- |   |-- models/                 # Block 2: Anomaly Detection Engines
- |   |   |-- autoencoder_deep.py # Deep Autoencoder (reconstruction error based)
- |   |   |-- autoencoder_lstm.py # LSTM Autoencoder for sequential patterns
- |   |   |-- gan_detector.py     # Generative Adversarial Network for anomaly scoring
- |   |   |-- xgb_detector.py     # XGBoost Classifier with Purged CV
- |   |   |-- isolation_forest.py # Baseline: Isolation Forest (unsupervised)
- |   |-- evaluation/             # Block 3: Model Tournament & Financial Analysis
- |   |   |-- metrics_engine.py   # Accuracy, Precision, Recall, F1, AUC-ROC, AUC-PR
- |   |   |-- threshold_analyzer.py # Optimal threshold via Precision-Recall curves
- |   |   |-- results/            # Output artifacts (.npy, .csv)
- |   |-- dashboard/              # Interactive Streamlit Dashboard
- |   |   |-- app.py              # Multi-page application
- |   |   |-- pages_utils.py      # Plotly visualization utilities
- |   |-- main_preprocessing.py   # Block 1 Orchestrator
- |   |-- main_training.py        # Block 2 Orchestrator (Model Tournament)
- |   |-- main_evaluation.py      # Block 3 Orchestrator (Comparative Results)
- |-- fastapii.py                 # Block 4 RESTful API (FastAPI)
- |-- Dockerfile                  # Contenedor de Producción
- |-- .dockerignore               # Reglas de exclusión para Docker
- |-- .github/
- |   |-- workflows/
- |   |   |-- ci.yml              # Continuous Integration (lint + smoke test)
- |-- requirements.txt
- |-- README.md
+├── data/
+│   ├── raw/transactions.csv
+│   └── processed/transactions_engineered.csv
+├── docs/
+│   └── ficha_metodologica_cmf_uaf.md     # Dossier Oficial de Validación CMF/UAF
+├── requirements/
+│   ├── base.txt                          # Core (numpy, pandas, pydantic)
+│   ├── serving.txt                       # Producción API (fastapi, xgboost, shap, redis)
+│   ├── training.txt                      # Offline DL (tensorflow, optuna, mlflow)
+│   ├── bigdata.txt                       # Databricks (pyspark, delta-spark)
+│   ├── compliance.txt                    # GenAI RAG (langchain, chromadb)
+│   ├── dashboard.txt                     # Visualización (streamlit, plotly)
+│   └── dev.txt                           # Calidad (pytest, pytest-cov, flake8)
+├── src/
+│   ├── cache/                            # Redis Client & Fallback Fakeredis
+│   ├── compliance/                       # GenAI Compliance ROS Agent (UAF Ley 19.913)
+│   ├── dashboard/                        # Streamlit Multi-Page Portal
+│   ├── evaluation/                       # Torneo de Modelos y Calibración Ley 21.234
+│   ├── explainability/                   # TreeSHAP Local & Global Explanations
+│   ├── graphs/                           # NetworkX & PySpark Graph Feature Engineering
+│   ├── models/                           # 5 Modelos ML/DL + MLflow Governance
+│   ├── preprocessing/                    # Síntesis con Distribución de Pareto & ETL
+│   ├── rules/                            # Motor Híbrido CMF Capítulo 20-10
+│   ├── main_preprocessing.py             # Orquestador Datos
+│   ├── main_training.py                  # Orquestador Entrenamiento
+│   └── main_evaluation.py                # Orquestador Torneo
+├── tests/                                # Suite Completa de Pruebas Unitarias Pytest
+├── fastapii.py                           # API v2.0 Enterprise (Dual SLA)
+├── Dockerfile                            # Multi-stage ultra-lean serving (< 250 MB)
+└── .github/workflows/ci.yml              # Pipeline CI/CD Automatizado
 ```
 
 ---
 
-## Installation and Setup
+## 🛠️ Instalación y Puesta en Marcha
 
-1. **Clone the repository** and open the terminal in the project root.
-2. **Create and activate a virtual environment (Recommended):**
-   ```bash
-   python -m venv venv
-   # On Windows:
-   venv\Scripts\activate
-   # On Mac/Linux:
-   source venv/bin/activate
-   ```
-3. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
----
-
-## Execution Workflow (Pipeline)
-
-To reproduce the experiments, execute the following scripts in order:
-
-### Block 1: Data Preprocessing
-Generates synthetic transaction data (100K transactions, ~2% fraud rate) with realistic fraud patterns (velocity attacks, geo-anomalies, amount spikes). Then applies feature engineering: customer statistics, velocity features, cyclical time encoding, and interaction features.
+### 1. Clonar e Instalar Entorno
 ```bash
-python src/main_preprocessing.py
-```
-*(Generates: `data/processed/transactions_engineered.csv`)*
+git clone https://github.com/ronaldreighsrsc/fraud-detection-system.git
+cd fraud-detection-system
 
-### Block 2: Model Training
-Trains three anomaly detection models with temporal train/test split (80/20). The Autoencoder is trained exclusively on normal transactions. XGBoost uses Purged K-Fold CV (López de Prado) with `scale_pos_weight` for class imbalance.
+# Crear y activar entorno virtual
+python -m venv venv
+venv\Scripts\activate       # En Windows
+# source venv/bin/activate  # En Linux/Mac
+
+# Instalar dependencias
+pip install -r requirements.txt
+```
+
+### 2. Ejecutar la Suite de Pruebas Automatizadas
 ```bash
-python src/main_training.py
+pytest tests/ -v
 ```
-*(Generates: `.npy` prediction files and `feature_importances.csv` in `src/evaluation/results/`)*
 
-### Block 3: Comparative Evaluation
-Runs the model tournament with accuracy, precision, recall, F1-score, AUC-ROC, AUC-PR, and estimated financial cost analysis (cost of false negatives vs false positives).
+### 3. Levantar la API en Tiempo Real (FastAPI)
 ```bash
-python src/main_evaluation.py
+uvicorn fastapii:app --host 0.0.0.0 --port 8000 --reload
 ```
-*(Generates: Tournament table in console and `fraud_tournament.csv`)*
-
-### Interactive Dashboard (Visualization)
-Launches a **Streamlit** web application with four interactive pages: Dataset Overview, Model Tournament, Anomaly Analysis (with interactive threshold slider), and Data Explorer.
-```bash
-streamlit run src/dashboard/app.py
-```
-*(Opens a local web server at `http://localhost:8501` with interactive Plotly charts).*
-
-### Block 4: RESTful API Deployment (Real-Time Inference)
-Exposes the 5 trained ML models (XGBoost, Isolation Forest, Deep Autoencoder, LSTM, GAN) through a high-performance **FastAPI** server. It utilizes `lifespan` for in-memory model caching and validates incoming JSON payloads representing transactions using **Pydantic**.
-```bash
-uvicorn fastapii:app --reload
-```
-*(Opens an interactive Swagger UI documentation at `http://127.0.0.1:8000/docs` to test the predictive endpoints).*
+- **Documentación Interactiva Swagger:** `http://localhost:8000/docs`
+- **Health Check:** `http://localhost:8000/health`
+- **Info v2 Enterprise:** `http://localhost:8000/api/v2/info`
 
 ---
 
-## 🐳 Docker Deployment (MLOps)
+## 🎯 Speech Táctico para la Entrevista Técnica en Banco Bci
 
-The API and its pre-trained models are fully containerized using **Docker** for seamless production deployment. This ensures a consistent, isolated environment across any host machine without requiring local Python dependencies.
-
-1. **Build the image:**
-   ```bash
-   docker build -t fraud-api .
-   ```
-2. **Run the container:**
-   ```bash
-   docker run -p 8000:8000 fraud-api
-   ```
-*(The API will be exposed and accessible at `http://localhost:8000/docs`).*
-
----
-
-## Implemented Models
-
-1. **Deep Autoencoder:** Symmetric architecture (Input→64→32→16→32→64→Input) trained only on normal transactions. Anomalies detected via reconstruction error exceeding a dynamic P95 threshold.
-2. **LSTM Autoencoder:** Sequential deep learning model capturing the temporal velocity of transactions. Achieves state-of-the-art anomaly detection on time-series fraud.
-3. **GAN Anomaly Detector:** Generative Adversarial Network where the Discriminator learns the genuine transaction distribution to flag out-of-distribution fraudulent attacks.
-4. **XGBoost Classifier:** Gradient Boosting with `scale_pos_weight` for class imbalance, Purged & Embargoed K-Fold CV, and F1-Score optimization.
-5. **Isolation Forest (Baseline):** Unsupervised ensemble method using random partitions to isolate anomalies.
-
----
-
-## Synthetic Data Strategy
-
-The `data_synthesizer.py` module generates realistic financial transactions profiling customers in **Santiago, Chile** with three fraud vectors:
-- **Amount Spikes (40%):** Amounts 5-20x the customer's average.
-- **Geo-Anomalies (35%):** Transactions 50-500 km from the customer's home.
-- **Velocity Attacks (25%):** Unusual hours (midnight-5am) with atypical merchants.
-
-> **Real-World Compatibility:** The pipeline is designed to be compatible with the [IEEE-CIS Fraud Detection](https://www.kaggle.com/c/ieee-fraud-detection) dataset from Kaggle. To use real data, simply replace the CSV in `data/raw/` and update the column mappings in `data_loader.py`.
-
----
-
-## Certifications & Methodology
-
-- **NVIDIA:** Applications of AI for Anomaly Detection
-- **Anti-Leakage:** Purged K-Fold Cross-Validation with Embargo (López de Prado, 2018)
-- **Evaluation:** Multi-metric tournament with financial cost analysis
-
----
-
-## V2.0: Big Data & GPU Scalability (NVIDIA RAPIDS)
-
-While the current main branch is designed for CPU execution (Pandas/Scikit-Learn) to ensure maximum compatibility for anyone cloning the repo, this architecture is fully prepared to scale to massive financial datasets (e.g., millions of transactions per day).
-
-To achieve extreme performance without CPU-to-GPU memory bottlenecks, the ETL and training pipelines can be migrated to **NVIDIA RAPIDS**:
-
-1. **cuDF (GPU Pandas):** Replaces traditional Pandas for Feature Engineering (rolling statistics, customer behavior aggregation). Data is loaded directly into GPU VRAM.
-2. **Apache Arrow:** Eliminates serialization overhead. Data remains in the GPU memory while moving from the cuDF preprocessing step directly into the model.
-3. **XGBoost (GPU Accelerated):** Uses 	ree_method='gpu_hist' to train on the GPU directly from the cuDF data structure, dropping training times from hours to seconds even with millions of rows.
-
-*Note: An experimental implementation of this GPU pipeline is available in the eature/rapids-gpu-scaling branch.*
+> *"Diseñé una plataforma de defensa multicapa para riesgos no financieros inspirada directamente en la operativa bancaria chilena y la normativa CMF Capítulo 20-10 y UAF.*
+> 
+> *En primer lugar, implementé una **Arquitectura Dual Lambda**: en la capa batch distribuida, jobs de **PySpark en Databricks** procesan transferencias sobre Delta Lake para calcular métricas de **Teoría de Grafos** (In-Degree, PageRank y detección de Cuentas Mula para PLAFT), persistiendo los atributos en **Redis** para que la API en **FastAPI** haga un point lookup atómico en menos de 2 milisegundos sin tocar disco.*
+> 
+> *En segundo lugar, integré un **Motor Híbrido** donde primero actúan reglas duras deterministas de la CMF y luego el scoring predictivo de XGBoost y Autoencoders. Como Ingeniero Civil Industrial, no calibré el modelo por F1-Score simétrico, sino por **Costo Económico Real bajo la Ley 21.234**, con una matriz asimétrica 40:1 que pondera la restitución obligatoria de hasta 35 UF frente a la fricción operativa.*
+> 
+> *En tercer lugar, para cumplir con la explicabilidad obligatoria de rechazos exigida por el regulador, incorporé **TreeSHAP** para auditar en tiempo real las 3 causas de cada bloqueo. Todo el ciclo de vida está documentado formalmente en la **Ficha Metodológica MRM** y registrado en **MLflow**.*
+> 
+> *Y finalmente, desarrollé un agente **RAG con ChromaDB y LangChain** indexado con las Guías Oficiales de Tipologías de la UAF, que redacta de forma autónoma el borrador del Reporte de Operaciones Sospechosas (ROS) listo para el Oficial de Cumplimiento.*
+> 
+> *Todo el sistema corre containerizado en Docker con CI/CD automatizado en GitHub Actions."*

@@ -1,5 +1,11 @@
 import os
+import sys
 import warnings
+
+if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
 from preprocessing.data_synthesizer import TransactionSynthesizer
 from preprocessing.data_loader import DataLoader
 from preprocessing.feature_engineer import TransactionFeatureEngineer

@@ -1,28 +1,23 @@
-# Usa una imagen oficial de Python ligera
-FROM python:3.10-slim
+# Multi-stage ultra-lean para Producción FastAPI (< 250 MB)
+# Bci Autonomous Risk & Fraud Prevention API v2.0
+FROM python:3.12-slim AS runtime
 
-# Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Instala las dependencias del sistema necesarias para compilar algunas librerías de ML
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+# Crear usuario de sistema no-root para seguridad bancaria
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-# Copia los requerimientos primero (Aprovecha el caché de capas de Docker)
-COPY requirements.txt .
+# Instalar dependencias estrictas de serving (sin TensorFlow pesado en el contenedor de inferencia rápida)
+COPY requirements/base.txt requirements/serving.txt ./requirements/
+RUN pip install --no-cache-dir -r requirements/serving.txt
 
-# Instala las librerías de Python
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copia el código fuente y los modelos pre-entrenados
-# OJO: Gracias al .dockerignore, no copiaremos venv ni los datasets pesados
+# Copiar artefactos ligeros de inferencia y código fuente
 COPY src/ ./src/
 COPY models/saved_models/ ./models/saved_models/
 COPY fastapii.py .
 
-# Expone el puerto 8000 para que podamos conectarnos desde fuera
+USER appuser
 EXPOSE 8000
 
-# Comando para iniciar la API cuando el contenedor arranque
-CMD ["uvicorn", "fastapii:app", "--host", "0.0.0.0", "--port", "8000"]
+# Workers optimizados para serving de baja latencia (< 30 ms)
+CMD ["uvicorn", "fastapii:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

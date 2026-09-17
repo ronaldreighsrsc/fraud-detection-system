@@ -1,4 +1,4 @@
-name: CI - Fraud Detection System
+name: CI - Bci Enterprise Fraud Risk System v2.0
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  lint-and-test:
+  test-and-validate:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,16 +23,23 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install httpx pytest-cov
 
-      - name: Smoke test - Import modules
+      - name: Run Pytest Suite
+        run: |
+          pytest tests/ -v --color=yes
+
+      - name: Smoke test - Enterprise Modules Integrity
         run: |
           cd src
           python -c "from preprocessing.data_synthesizer import TransactionSynthesizer; print('✅ Synthesizer OK')"
           python -c "from preprocessing.data_loader import DataLoader; print('✅ DataLoader OK')"
           python -c "from preprocessing.feature_engineer import TransactionFeatureEngineer; print('✅ FeatureEngineer OK')"
-          python -c "from models.autoencoder_deep import FraudDeepAutoencoder; print('✅ Deep Autoencoder OK')"
-          python -c "from models.autoencoder_lstm import FraudLSTMAutoencoder; print('✅ LSTM Autoencoder OK')"
+          python -c "from graphs.graph_analyzer import TransactionGraphAnalyzer; print('✅ GraphAnalyzer OK')"
+          python -c "from rules.rules_engine import HybridRulesEngine; print('✅ RulesEngine OK')"
+          python -c "from cache.redis_client import FastGraphCache; print('✅ Cache OK')"
+          python -c "from explainability.shap_explainer import ModelExplainer; print('✅ SHAP OK')"
+          python -c "from compliance.uaf_ros_agent import ComplianceROSAgent; print('✅ ROS Agent OK')"
           python -c "from models.xgb_detector import FraudXGBoostDetector; print('✅ XGBoost OK')"
-          python -c "from models.isolation_forest import AnomalyIsolationForest; print('✅ IsolationForest OK')"
           python -c "from evaluation.metrics_engine import FraudMetricsEngine; print('✅ MetricsEngine OK')"
           python -c "from evaluation.threshold_analyzer import ThresholdAnalyzer; print('✅ ThresholdAnalyzer OK')"
