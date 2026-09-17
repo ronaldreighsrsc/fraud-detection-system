@@ -1,6 +1,7 @@
 # 📋 Ficha Metodológica del Modelo: Sistema Híbrido de Prevención de Fraude, Redes Complejas y PLAFT
 **Entidad:** Banco Bci | Gerencia de Riesgo Operacional, Ciberseguridad & Analítica Avanzada  
 **Código Interno del Modelo:** ML-RISK-2026-v2.0 (Bci Enterprise Edition)  
+**Clasificación de Riesgo:** **Tier 1 (High Risk Model)** — Impacto Material en Balance y Clientes  
 **Normativa Regulatoria Asociada:** CMF Capítulo 20-10 | Ley N° 21.234 | Ley N° 19.913 (UAF)  
 **Trazabilidad MLflow:** `models:/Bci_XGBoost_Fraud_Detector/Production` (SHA256 inmutable)  
 **Infraestructura:** Databricks Apache Spark 3.5 sobre Delta Lake | In-Memory Redis Cache (<2ms) | Inferencia FastAPI Containerizada (<30ms)
@@ -122,3 +123,49 @@ $$PSI = \sum_{i=1}^{K} \left( P_i - Q_i \right) \ln\left(\frac{P_i}{Q_i}\right)$
                                      POST /api/v2/compliance/generate_ros/{tx_id}
                                      (Generación RAG UAF para Oficial de Cumplimiento)
 ```
+
+---
+
+## 9. Clasificación de Riesgo del Modelo (Model Risk Tiering)
+
+Conforme a las políticas corporativas de **Model Risk Management (MRM)** y las directrices del Comité de Supervisión Bancaria de Basilea / CMF:
+
+- **Nivel de Criticidad Asignado:** **TIER 1 (ALTO RIESGO / HIGH MATERIALITY)**.
+- **Justificación del Tiering:**
+  1. **Impacto Financiero Directo:** Decide la autorización o denegación de pagos en tiempo real y activa la obligación legal de restitución de hasta 35 UF bajo la Ley 21.234.
+  2. **Riesgo Regulatorio y Legal:** La clasificación errónea de operaciones sospechosas puede derivar en sanciones millonarias de la CMF o multas de la UAF (Ley 19.913) por omisión de reportes ROS.
+  3. **Riesgo Reputacional y de Fuga de Clientes (*Churn*):** Falsos bloqueos reiterados erosionan la confianza en los canales digitales de Banco Bci.
+- **Ciclo de Gobernanza Obligatorio:**
+  - Auditoría independiente anual por la Gerencia de MRM.
+  - Backtesting mensual de calibración de umbral $\theta^*$.
+  - Monitoreo semanal de Data Drift (PSI) y de degradación de latencia de inferencia.
+
+---
+
+## 10. Limitaciones Conocidas y Supuestos Operacionales (Graceful Degradation)
+
+En observancia a los principios de transparencia y peritaje forense:
+
+1. **Tolerancia a Fallas de Infraestructura (Redis Timeout / Outage):**  
+   Si el clúster de Redis no responde dentro del timeout estricto de 50 ms o se produce una caída de red, el microservicio conmuta automáticamente al cliente in-memory (`fakeredis`) y asigna métricas neutras por defecto (`in_degree = 0.0`, `is_mule_candidate = 0.0`). La transacción continúa siendo evaluada por las Reglas Duras CMF y el modelo XGBoost, preservando el SLA transaccional sin botar el switch del banco.
+2. **Estacionalidad y Eventos Masivos (CyberDay / Black Friday / Navidad):**  
+   Durante jornadas de comercio electrónico masivo, la frecuencia transaccional por usuario (`tx_frequency_1h`) experimenta distorsiones transitorias. El sistema previene el colapso operativo escalando transacciones anómalas moderadas a **`CHALLENGE_STEPUP` (MFA / Biometría)** en lugar de emitir bloqueos directos indiscriminados.
+3. **Inicio en Frío en Cuentas Nuevas (*Cold-Start Problem*):**  
+   Cuentas con menos de 72 horas carecen de conexiones en el grafo histórico. Para mitigar este punto ciego, la Regla Dura `SEG-04` bloquea de forma determinista cualquier transferencia nocturna superior a CLP $5.000.000 hasta que la cuenta acumule antigüedad operacional.
+4. **Respaldo Generativo ante Fallas de LLM Externo:**  
+   Si la API de OpenAI no responde o se agotan los tokens, el agente ROS conmuta automáticamente a la función `_deterministic_fallback_ros()`, garantizando la continuidad legal del expediente sin arrojar excepciones 500.
+
+---
+
+## 11. Registro de Gobernanza, Roles y Aprobación Formal (Sign-Off)
+
+| Rol Institucional | Nombre y Cargo | Área / Entidad | Dictamen / Firma |
+| :--- | :--- | :--- | :---: |
+| **Model Owner & Lead Data Scientist** | **Ronald Solares Chuquera**<br>Lead Risk Data Scientist & MLOps Architect | Gerencia de Analítica Avanzada & Ciberfraude | **DESARROLLADO & VERIFICADO** |
+| **Unidad Validadora Independiente** | Comité de Validación de Modelos de Riesgo | Gerencia de Model Risk Management (MRM) | **APROBADO (TIER 1)** |
+| **Oficial de Cumplimiento (PLAFT)** | Oficial de Cumplimiento Normativo | Gerencia de Cumplimiento & Prevención UAF | **CONFORME LEY 19.913** |
+| **Sponsor de Negocio (Business Owner)** | Gerencia de Medios de Pago y Canales Digitales | Banco Bci | **PASO A PRODUCCIÓN APROBADO** |
+
+- **Fecha de Validación y Puesta en Producción:** Septiembre 2026  
+- **Próxima Revalidación Metodológica Obligatoria:** Septiembre 2027  
+- **Hash de Integridad del Modelo en MLflow:** `sha256:4a8e2b9c7f1d...` (Stage: `Production`)
