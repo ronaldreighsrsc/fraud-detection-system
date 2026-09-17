@@ -73,7 +73,7 @@ $$\min_{\theta \in [0, 1]} \text{Costo Total}(\theta) = C_{FN} \cdot FN(\theta) 
 
 $$\text{Donde: } C_{FN} = \$1.000.000\text{ CLP (restitución obligatoria hasta 35 UF + provisión + peritaje)} \quad \text{vs.} \quad C_{FP} = \$25.000\text{ CLP (fricción cliente / churn)}$$
 
-- Demuestra una asimetría económica de **40:1**, logrando más de un 60% de ahorro neto frente al corte ingenuo estándar de $\theta = 0.50$.
+- Demuestra analíticamente una asimetría económica de **40:1**, justificando formalmente ante el comité de riesgos por qué un corte conservador ($\theta^* < 0.50$) minimiza la pérdida económica esperada ante la exigencia de restitución de hasta 35 UF.
 
 ### 4. Motor de Reglas CMF Capítulo 20-10 (`src/rules/rules_engine.py`)
 - Separa con estricta claridad las **Reglas Duras deterministas** (listas de bloqueo judicial / OFAC, transferencias hacia países sancionados PLAFT como PRK o IRN, y operaciones nocturnas de alto monto $> \$5\text{M CLP}$ en cuentas de reciente apertura $< 3\text{ días}$) de la **Matriz de Decisión Híbrida Multicriterio**:
@@ -104,6 +104,87 @@ $$\text{Donde: } C_{FN} = \$1.000.000\text{ CLP (restitución obligatoria hasta 
 
 ---
 
+## 🔌 Contratos de la API (Request & Response en Producción)
+
+### 1. Evaluación Transaccional Síncrona (`SLA < 30 ms`)
+**Endpoint:** `POST /api/v2/evaluate_transaction`
+
+#### Request Payload:
+```json
+{
+  "tx_id": "TX-BCI-2026-99210",
+  "origin_account": "ACC_SUSPECT_01",
+  "destination_account": "ACC_MULE_101",
+  "destination_country": "CHL",
+  "account_age_days": 180,
+  "transaction_amount": 7500000,
+  "hour_of_day": 3,
+  "day_of_week": 2,
+  "merchant_category": 1,
+  "distance_from_home": 350.0,
+  "is_international": 0
+}
+```
+
+#### Response Payload (Bloqueo Preventivo + Causalidad TreeSHAP):
+```json
+{
+  "tx_id": "TX-BCI-2026-99210",
+  "action": "BLOCK_PREVENTIVE",
+  "risk_level": "HIGH",
+  "final_risk_score": 0.8842,
+  "requires_mfa": false,
+  "notify_compliance": true,
+  "reason": "Score predictivo de alto riesgo supera umbral crítico (theta > 0.70) | Penalización PLAFT: Cuenta identificada como nodo concentrador mula (+0.30)",
+  "graph_topology": {
+    "origin_in_degree": 1.0,
+    "origin_out_degree": 6.0,
+    "is_mule_detected": true
+  },
+  "top_shap_reasons": [
+    {
+      "feature": "transaction_amount",
+      "feature_label": "Monto de la transacción",
+      "shap_impact": 0.4512,
+      "actual_value": 7500000.0,
+      "direction": "RISK_INCREASING"
+    },
+    {
+      "feature": "distance_from_home",
+      "feature_label": "Distancia al domicilio habitual",
+      "shap_impact": 0.3120,
+      "actual_value": 350.0,
+      "direction": "RISK_INCREASING"
+    },
+    {
+      "feature": "hour_of_day",
+      "feature_label": "Hora de la operación",
+      "shap_impact": 0.1850,
+      "actual_value": 3.0,
+      "direction": "RISK_INCREASING"
+    }
+  ],
+  "latency_ms": "18.25 ms"
+}
+```
+
+---
+
+### 2. Generación Asíncrona de Informe ROS para la UAF
+**Endpoint:** `POST /api/v2/compliance/generate_ros/{tx_id}`
+
+#### Response:
+```json
+{
+  "tx_id": "TX-BCI-2026-99210",
+  "status": "GENERADO_EXITOSAMENTE",
+  "normativa": "Ley N° 19.913 (UAF Chile) & CMF Capítulo 20-10",
+  "ros_formal_report": "================================================================================\nCONFIDENCIAL - PRE-INFORME DE OPERACIÓN SOSPECHOSA (ROS) [UAF CHILE]\nDESTINATARIO: Unidad de Análisis Financiero (UAF) - Ley N° 19.913\nENTIDAD: Banco Bci | Gerencia de Riesgo Operacional, Ciberseguridad & PLAFT\nFUNDAMENTO LEGAL: Tipología UAF N° 3 (Triangulación de Cuentas Puente / Mulas)\n================================================================================\n..."
+}
+```
+
+---
+
 ## 🏆 Separación de Modelos: Training Offline vs. Serving Ultra-Lean (< 200 MB)
 
 Uno de los pilares de ingeniería de MLOps de este proyecto es la **separación estricta de responsabilidades entre el entorno analítico experimental y el microservicio de inferencia en tiempo real**:
@@ -112,6 +193,23 @@ Uno de los pilares de ingeniería de MLOps de este proyecto es la **separación 
 | :--- | :--- | :--- |
 | **Entrenamiento & Torneo Offline** | `autoencoder_deep.py`<br>`autoencoder_lstm.py`<br>`gan_detector.py`<br>`main_training.py` | **`requirements/training.txt` (TensorFlow / Keras / Optuna):**<br>Conserva en el repositorio los modelos retadores de redes neuronales densas, recurrentes LSTM y arquitecturas generativas adversarias (GANs de NVIDIA). Estos modelos demuestran maestría en Deep Learning y están documentados en la Ficha Metodológica como baselines analíticos. |
 | **Inferencia en Producción (Serving)** | `xgb_detector.py`<br>`isolation_forest.py`<br>`fastapii.py`<br>`Dockerfile` | **`requirements/serving.txt` (XGBoost / Scikit-Learn / FastAPI):**<br>El **Modelo Campeón** en producción es XGBoost (F1: 0.912, AUC-ROC: 0.985), único que cumple el SLA de inferencia sub-5ms. En `fastapii.py` se han purgado todas las dependencias pesadas de TensorFlow, logrando un contenedor Docker de **menos de 200 MB** que arranca en 0.2 segundos y elimina código muerto en producción. |
+
+---
+
+## 📊 Portal Interactivo de Monitoreo (Dashboard Streamlit)
+
+El repositorio incluye un portal web interactivo multi-página desarrollado en **Streamlit & Plotly** para auditoría y visualización del torneo de modelos:
+
+```bash
+streamlit run src/dashboard/app.py
+```
+*(Acceso en `http://localhost:8501`)*
+
+### Vistas Disponibles en el Portal:
+1. **Dataset Overview:** Distribución espaciotemporal, análisis demográfico y mapas de calor transaccionales en Santiago de Chile.
+2. **Model Tournament:** Benchmark comparativo de métricas analíticas (F1, AUC-ROC, AUC-PR) y costos económicos asociados.
+3. **Anomaly Analysis:** Explorador interactivo de umbrales con slider dinámico ($\theta \in [0, 1]$), curvas Precision-Recall y matriz de confusión recalculada en tiempo real.
+4. **Data Explorer:** Inspección tabular y filtrado multicriterio sobre el dataset de transacciones.
 
 ---
 
@@ -182,3 +280,10 @@ uvicorn fastapii:app --host 0.0.0.0 --port 8000 --reload
 - **Documentación Interactiva Swagger:** `http://localhost:8000/docs`
 - **Health Check:** `http://localhost:8000/health`
 - **Info del Sistema v2 Enterprise:** `http://localhost:8000/api/v2/info`
+
+### 4. Reproducción del Pipeline Offline (ETL & Entrenamiento)
+```bash
+python src/main_preprocessing.py   # Bloque 1: Generación con Ley de Pareto y Feature Engineering
+python src/main_training.py        # Bloque 2: Entrenamiento del Torneo de Modelos
+python src/main_evaluation.py      # Bloque 3: Evaluación Comparativa y Curvas de Umbral
+```
