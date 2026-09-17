@@ -11,12 +11,9 @@ import numpy as np
 import uuid
 import time
 
-# Importar modelos v1
+# Importar modelo campeón y baseline ligero (sin TensorFlow para serving ultra-lean < 200 MB)
 from src.models.xgb_detector import FraudXGBoostDetector
 from src.models.isolation_forest import AnomalyIsolationForest
-from src.models.autoencoder_deep import FraudDeepAutoencoder
-from src.models.autoencoder_lstm import FraudLSTMAutoencoder
-from src.models.gan_detector import FraudGANDetector
 
 # Importar subsistemas v2 Enterprise
 from src.cache.redis_client import FastGraphCache
@@ -38,14 +35,11 @@ async def lifespan(app: FastAPI):
     """
     print("⏳ [Serving Init] Cargando modelos de IA y motores v2 en memoria...")
     
-    # 1. Cargar modelos predictivos
+    # 1. Cargar modelo campeón (XGBoost) y baseline (Isolation Forest)
     try:
         ml_models['xgb'] = FraudXGBoostDetector.load("./models/saved_models/xgb.pkl")
         ml_models['iso'] = AnomalyIsolationForest.load("./models/saved_models/iso.pkl")
-        ml_models['ae_deep'] = FraudDeepAutoencoder.load("./models/saved_models/ae_deep.pkl")
-        ml_models['ae_lstm'] = FraudLSTMAutoencoder.load("./models/saved_models/ae_lstm.pkl")
-        ml_models['gan'] = FraudGANDetector.load("./models/saved_models/gan.pkl")
-        print("  ✅ [ML Models] 5 Modelos de IA cargados exitosamente.")
+        print("  ✅ [ML Models] Modelo Campeón XGBoost y Baseline cargados (Serving Ultra-Lean).")
     except Exception as e:
         print(f"  ⚠️ [ML Models] Advertencia al cargar modelos: {e}")
 
@@ -422,18 +416,6 @@ def predict_fraud(transaction: Transaction):
     if 'iso' in ml_models:
         pred, score = ml_models['iso'].predict(features)
         resultados['isolation_forest'] = {"is_fraud": bool(pred[0]), "anomaly_score": float(score[0])}
-
-    if 'ae_deep' in ml_models:
-        pred, score = ml_models['ae_deep'].predict(features)
-        resultados['deep_autoencoder'] = {"is_fraud": bool(pred[0]), "reconstruction_mse": float(score[0])}
-
-    if 'ae_lstm' in ml_models:
-        pred, score = ml_models['ae_lstm'].predict(features)
-        resultados['lstm_autoencoder'] = {"is_fraud": bool(pred[0]), "reconstruction_mse": float(score[0])}
-
-    if 'gan' in ml_models:
-        pred, score = ml_models['gan'].predict(features)
-        resultados['gan'] = {"is_fraud": bool(pred[0]), "anomaly_score": float(score[0])}
 
     return {
         "status": "Transacción analizada",
