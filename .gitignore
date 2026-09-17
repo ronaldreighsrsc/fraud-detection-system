@@ -16,3 +16,9 @@ src/evaluation/results/*.csv
 models/saved_models/
 *.pkl
 *.keras
+
+# MLflow & Pruebas
+mlruns/
+*.db
+.pytest_cache/
+

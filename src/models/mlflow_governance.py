@@ -82,18 +82,28 @@ class MLflowGovernanceManager:
     def promote_to_cmf_validation(self, model_name: str, version: int) -> bool:
         """
         Avanza el modelo a la etapa formal de Validación de Modelos de Riesgo ante la CMF.
+        En MLflow, se transiciona al stage canónico 'Staging' y se etiqueta con 'Staging_Validacion_CMF'.
         """
         if not self.mlflow_available or self.client is None:
-            print(f"🛡️ [MRM Transición]: {model_name} v{version} promovido a 'Staging_Validacion_CMF' (Audit Trail Local).")
+            print(f"🛡️ [MRM Transición]: {model_name} v{version} promovido a 'Staging' (Audit Trail Local).")
             return True
 
         try:
             self.client.transition_model_version_stage(
                 name=model_name,
                 version=version,
-                stage="Staging_Validacion_CMF",
+                stage="Staging",
                 archive_existing_versions=False
             )
+            try:
+                self.client.set_model_version_tag(
+                    name=model_name,
+                    version=version,
+                    key="regulatory_audit",
+                    value="Staging_Validacion_CMF"
+                )
+            except Exception:
+                pass
             return True
         except Exception as e:
             print(f"⚠️ Error en transición a Staging CMF: {e}")
