@@ -9,8 +9,24 @@
 ![Docker](https://img.shields.io/badge/Docker-Ultra--Lean_<200MB-2496ed?style=for-the-badge&logo=docker)
 ![CMF](https://img.shields.io/badge/CMF-Capítulo_20--10-navy?style=for-the-badge)
 ![MLflow](https://img.shields.io/badge/MLflow-Model_Registry-0194e2?style=for-the-badge&logo=mlflow)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Plataforma corporativa de misión crítica para la prevención de fraudes bancarios, detección de lavado de activos (PLAFT) mediante redes complejas de cuentas mula, explicabilidad regulatoria (CMF / Ley 21.234) y gobernanza inmutable de modelos (Model Risk Management - MRM), diseñada bajo la normativa del sistema financiero chileno.
+
+---
+
+## 🏛️ El Cuarteto de Misión Crítica Transversal (Los 4 Pilares)
+
+Este sistema constituye el primer pilar de un marco integral de ingeniería que aplica sistemas distribuidos, inferencia en tiempo real y optimización bajo funciones de costo asimétricas en cuatro sectores de alto impacto:
+
+| Dimensión de Ingeniería | 1. Banca / Fraude (Bci) | 2. IoT Edge (OmniEdge) | 3. Quant Trading (AlphaEdge) | 4. Mining CBM (CAEX Sentinel) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. Restricción Temporal (SLA)** | **Switch Transaccional (< 30 ms)** | Handover Wi-Fi (< 800 ms) | Tick-to-Order MT5 (< 15 ms) | Ingesta CAN Streaming (< 20 ms) |
+| **2. Función de Pérdida / Costo** | **Costo Asimétrico Ley 21.234 (40:1)** | Penalización Desconexión $C_{\text{switch}}$ | Fricción Microestructural (Spread + Slippage) | Falla en Rampa vs. Parada Taller |
+| **3. Restricción de Cómputo** | **Microservicios Cloud / Container** | Flash SD Wear / RAM < 120 MB | VPS Trading 1-2 GB RAM (< 130 MB, Zero OOM) | Edge Gateway / Docker < 350 MB |
+| **4. Detección de Deriva (Drift)** | **Population Stability Index (PSI)** | Test Kolmogorov-Smirnov RF | LSTM Autoencoder (P90/P99) + KS-Test 50 barras | Kolmogorov-Smirnov Sensor Drift |
+| **5. Agente Inteligente / Explicabilidad** | **Agente ROS CMF (Tipologías UAF)** | Agente RCA Falla Red (IEEE 802.11) | Agente Macro-Forense Pre-News & RCA Post-Trade | Agente SAP PM / ISO 13374 RAG |
+| **6. Persistencia y Caché** | **Redis In-Memory + Delta Lake** | Ring Buffer RAM + SQLite Batch | Caching RAM + SQLite WAL In-Process (`TradeVault`) | Ring Buffer RAM + SQLite WAL |
 
 ---
 
@@ -287,3 +303,11 @@ python src/main_preprocessing.py   # Bloque 1: Generación con Ley de Pareto y F
 python src/main_training.py        # Bloque 2: Entrenamiento del Torneo de Modelos
 python src/main_evaluation.py      # Bloque 3: Evaluación Comparativa y Curvas de Umbral
 ```
+
+---
+
+## 📜 Licencia & Portafolio Institucional
+- **Autor:** Ronald Solares (Ingeniero Civil Industrial — Data, MLOps & Distributed Systems).
+- **Licencia:** MIT License. Consulta [LICENSE](LICENSE) para más detalles.
+- **Suite de Misión Crítica (Los 4 Pilares):** Forma parte del marco transversal de ingeniería junto con [OmniEdge Sentinel](https://github.com/ronaldreighsrsc/edge-network-resilience-system), [AlphaEdge Quant Bot](https://github.com/ronaldreighsrsc/quant-trading-bot) y [CAEX Predictive Maintenance](https://github.com/ronaldreighsrsc/predictive-maintenance-system).
+
